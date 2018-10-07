@@ -1,0 +1,443 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>24小时快讯</title>
+</head>
+<body>
+<h1>24小时快讯</h1>
+<ul>
+<li><a href="#1">Re: Cannot pass a variable given from url to route's callback fucntion and redirect issue</a></li>
+<li><a href="#2">Shall I worry about python2/3 compatibility when using library?</a></li>
+<li><a href="#3">Re: Shall I worry about python2/3 compatibility when using library?</a></li>
+<li><a href="#4">Re: Shall I worry about python2/3 compatibility when using library?</a></li>
+<li><a href="#5">Re: Shall I worry about python2/3 compatibility when using library?</a></li>
+<li><a href="#6">Re: Shall I worry about python2/3 compatibility when using library?</a></li>
+<li><a href="#7">Re: Question about floating point</a></li>
+<li><a href="#8">Re: Shall I worry about python2/3 compatibility when using library?</a></li>
+<li><a href="#9">Re: Shall I worry about python2/3 compatibility when using library?</a></li>
+<li><a href="#10">EuroPython 2018: Videos for Thursday available</a></li>
+<li><a href="#11">ofo已拖欠云鸟、德邦等多家物流供应商亿元欠款</a></li>
+<li><a href="#12">阿里巴巴14.66亿元认购三江购物股票，持股比例增为 32%</a></li>
+<li><a href="#13">滴滴在杭承诺：停止向未取得网约车许可车辆人员派单</a></li>
+<li><a href="#14">滴滴：欢迎主管部门进驻检查，接受监督积极整改</a></li>
+<li><a href="#15">Apple Watch占全球智能手表41%份额，90%为一代产品</a></li>
+<li><a href="#16">腾讯将与史克威尔艾尼克斯成立合资公司</a></li>
+<li><a href="#17">传猎豹移动寻求私有化:开盘暴涨后回落，官方暂无回应</a></li>
+<li><a href="#18">传美团点评确定IPO定价区间：每股60-72港币</a></li>
+<li><a href="#19">小米向印度数字借贷平台ZestMoney投资1340万美元</a></li>
+<li><a href="#20">上海凤凰起诉ofo称后者拖欠贷款6815万，ofo不予置评</a></li>
+<li><a href="#21">顺丰：暗网所售数据非顺丰数据，不涉及物流特征信息</a></li>
+<li><a href="#22">消息称阿里巴巴将暂停在美国市场扩大云业务</a></li>
+<li><a href="#23">苹果报告加州首起自动驾驶汽车事故，没有人员伤亡</a></li>
+<li><a href="#24">流利说在美提交招股书，拟融资最多1亿美元</a></li>
+<li><a href="#25">苹果颁布新规：要求所有应用包含隐私保护协议</a></li>
+</ul><h2><a name="1">Re: Cannot pass a variable given from url to route's callback fucntion and redirect issue</a></h2>
+<p>On Thursday, August 30, 2018 at 10:08:34 AM UTC-6, =CE=9D=CE=AF=CE=BA=CE=BF=
+=CF=82 =CE=92=CE=AD=CF=81=CE=B3=CE=BF=CF=82 wrote:
+> I did try it with 'None' and as page=3D'index.html' Flask return an error=
+ both ways (while bottle framework does not)
+
+I think you are mistaken, making the change I suggested
+fixes the "TypeError: index() missing 1 required positional=20
+argument" error you asked about.
+
+Appended below is a runnable version of your code.  I couldn't
+tell from your post whether you just left out code after the=20
+"if page !=3D..." statement for posting or whether is is acually
+missing in your code.  I filled what was need to run.  Neither=20
+the html in your code or the temple are referenced by the code
+you posted so you'll need put the pieces together.
+
+> 2. Also about the redirect funtion iam using... is there a way to get bac=
+k the HTML response of running that cgi-scrit and then add another HTML val=
+ue to that response? I used subprocess and Response but they weren able to =
+deliver the content back the pdata variable for display.
+> What i actually want to do among other things is from within my flask app=
+ script to try to run and get theresponse back of a cgi-script
+
+A subprocess should work if you run it with environment variables=20
+set up the way web server would call it with.  Alternatively
+you could take the code in the cgi script (assuming its python)
+and put it in a module function somewhere, then the cgi script
+becomes a wrapper around a function call to it, and you can call=20
+the same function in your flask code.
+
+One last point: redirecting to an arbitrary page based on a url=20
+provided by an untrusted user strikes me as dangerous.  I would=20
+at least whitelist the pages with something like:
+   if page not in ('products', 'about', help'): abort (404)
+
+Hope this helps...
+------
+
+from flask import Flask, redirect
+app =3D Flask (__name__)
+
+@app.route( '/' )
+@app.route( '/<page>' )
+def index( page=3D'index.html' ):
+        # use the variable form template for displaying
+        pagehit =3D 333  # Tempory for testing
+        counter =3D '''<center>
+                        <table bgcolor=3Dblack bordercolor=3Dorangered>
+                        td><font size=3D3 color=3Dlime> =CE=91=CF=81=CE=B9=
+=CE=B8=CE=BC=CF=8C=CF=82 =CE=95=CF=80=CE=B9=CF=83=CE=BA=CE=B5=CF=80=CF=84=
+=CF=8E=CE=BD: </font></td>
+        <td><a href=3D"{{ url_for( '/log', page=3D'%s' ) }}"><font size=3D3=
+ color=3Dplum> %d </font></a></td>
+                                        </table>
+                                ''' % (page, pagehit)
+        if page !=3D 'index.html':
+            pdata =3D redirect( 'http://xxsuperhost.gr/cgi-bin/' + page )
+        else: pdata =3D "Hi, I'm the index page"
+        return pdata
+
+@app.route('/log')
+def log(): return "Hi, I'm the /log page"
+
+if __name__ =3D=3D '__main__':=20
+        app.run (host=3D'0.0.0.0', debug=3DTrue)</p>
+<h2><a name="2">Shall I worry about python2/3 compatibility when using library?</a></h2>
+<p>Hi there,
+
+I think the fact is:
+- There are still considerable amount of people still using python2
+- Python2 user will eventually upgrade to python3
+
+So any library not written in a compatible way will either break now for python2 user, or will break in the future for python3 user. So I suppose all library developer are writing compatible code, is that a fair assumption?
+
+Thanks,
+Stone</p>
+<h2><a name="3">Re: Shall I worry about python2/3 compatibility when using library?</a></h2>
+<p>On 8/30/2018 10:27 PM, Stone Zhong wrote:
+> Hi there,
+> 
+> I think the fact is:
+> - There are still considerable amount of people still using python2
+> - Python2 user will eventually upgrade to python3
+> 
+> So any library not written in a compatible way will either break now for python2 user, or will break in the future for python3 user. So I suppose all library developer are writing compatible code, is that a fair assumption?
+
+No.  Many people write new libraries only for recent version of Python 
+3.  Many people who have written Python 2 and 3 compatible libraries, or 
+Python 2 and Python 3 versions of of their library, have or will drop 
+Python 2 support for enhancements and even bugfixes for their library.
+
+That said, some people will continue to use existing python 2 code for a 
+decade or more.
+
+-- 
+Terry Jan Reedy
+</p>
+<h2><a name="4">Re: Shall I worry about python2/3 compatibility when using library?</a></h2>
+<p>On Thursday, August 30, 2018 at 10:19:34 PM UTC-7, Terry Reedy wrote:
+> On 8/30/2018 10:27 PM, Stone Zhong wrote:
+> > Hi there,
+> > 
+> > I think the fact is:
+> > - There are still considerable amount of people still using python2
+> > - Python2 user will eventually upgrade to python3
+> > 
+> > So any library not written in a compatible way will either break now for python2 user, or will break in the future for python3 user. So I suppose all library developer are writing compatible code, is that a fair assumption?
+> 
+> No.  Many people write new libraries only for recent version of Python 
+> 3.  Many people who have written Python 2 and 3 compatible libraries, or 
+> Python 2 and Python 3 versions of of their library, have or will drop 
+> Python 2 support for enhancements and even bugfixes for their library.
+> 
+> That said, some people will continue to use existing python 2 code for a 
+> decade or more.
+> 
+> -- 
+> Terry Jan Reedy
+
+Thanks for the reply Terry. Got it.
+
+So some people main separate libraries for python2 and python3 (although this way it may have extra cost), and may eventually drop support for python2 lib or may not even have library for python2.
+
+Thanks,
+Stone</p>
+<h2><a name="5">Re: Shall I worry about python2/3 compatibility when using library?</a></h2>
+<p>On 30Aug2018 19:27, Stone Zhong <stone.zhong@gmail.com> wrote:
+>I think the fact is:
+>- There are still considerable amount of people still using python2
+>- Python2 user will eventually upgrade to python3
+>
+>So any library not written in a compatible way will either break now for 
+>python2 user, or will break in the future for python3 user. So I suppose all 
+>library developer are writing compatible code, is that a fair assumption?
+
+That depends on the developer and the library.
+
+For myself, I try to write compatible code. For many things this is easy, and 
+for most things this is possible, especially with the help of some kind of 
+compatibility module like "six".
+
+There are some tutorials on writing portable Python 3 code, and on porting 
+Python 2 code.
+
+I have a little module of my own "cs.py3" which covers most of the things I've 
+needed to port; it aims to provide Python 3 flavoured versions of things. That 
+way (a) my code expects Python 3 (where that matters) and (b) the code runs 
+maximally efficiently under Python 3 because most of the things are just a 
+direct import of the Python 3 builtin - the Python 2 code is the emulation (for 
+want of a term).
+
+Why my own? To some extent so I learn myself what's changed. Nothing like 
+implenting something for Python 2 to match Python 3 for these things.
+
+I'll assume you're aware of the main differences; if not we can elaborate.
+
+Not everything can be done seamlessly, but you might be surprised how small an 
+issue it usually is.
+
+That said, I do have some modules which are Python 3 only. So far I think these 
+are all modules doing byte level parsing of binary data - this is outstandingly 
+easier in Python 3 - you're never unsure if you're dealing with bytes versus 
+text (str). I was looking at making them Python 2 capable, but the pain level 
+was too high.
+
+My advice: try to be portable (same code good for both 2 and 3), try to port 
+when this is an issue, try to use third party modules which work with both 2 
+and 3 when you have a choice, look at the 'six" module if things get harder.
+
+And aim for Python 2.7 - this goes a long way to making 2 and 3 easy to work 
+with. The fursther back you go in 2.x the harder it gets.
+
+Cheers,
+Cameron Simpson <cs@cskk.id.au></p>
+<h2><a name="6">Re: Shall I worry about python2/3 compatibility when using library?</a></h2>
+<p>On Fri, Aug 31, 2018 at 3:50 PM, Cameron Simpson <cs@cskk.id.au> wrote:
+> And aim for Python 2.7 - this goes a long way to making 2 and 3 easy to work
+> with. The fursther back you go in 2.x the harder it gets.
+
+Yep; also, aim for 3.5+, since you get the ability to write u"..."
+(from 3.3) and b"..."%... (from 3.5). That can make your life quite a
+bit easier.
+
+ChrisA</p>
+<h2><a name="7">Re: Question about floating point</a></h2>
+<p>Steven D'Aprano wrote:
+> The right way is to 
+> set the rounding mode at the start of your application, and then let the 
+> Decimal type round each calculation that needs rounding.
+
+It's not clear what you mean by "rounding mode" here. If you
+mean whether it's up/down/even/whatever, then yes, you can
+probably set that as a default and leave it.
+
+However, as far as I can see, Decimal doesn't provide a
+way of setting a default number of decimal places to
+which results are rounded. You can set a default *precision*,
+but that's not the same thing. (Precision is the total
+number of significant digits, not the number of digits
+after the decimal point.)
+
+So if you're working with dollars and cents and want all
+your divisions rounded to 2 places, you're going to have
+to do that explicitly each time.
+
+I don't think this is a bad thing, because often you
+don't want to use the same number of places for everything,
+For example, people dealing with high-volume low-value goods
+often calculate with unit prices having more than 2 decimal
+places. In those kinds of situations, you need to know
+exactly what you're doing every step of the way.
+
+> We have here a brilliant hammer specially designed for 
+> banging in just this sort of nail,
+
+Except that we don't, we actually have an impact screwdriver,
+so you've going to have to bring your hammer to deal with
+nails properly. And a single size of hammer isn't going to
+suit all kinds of nail.
+
+-- 
+Greg</p>
+<h2><a name="8">Re: Shall I worry about python2/3 compatibility when using library?</a></h2>
+<p>On 31/08/18 04:27, Stone Zhong wrote:
+> Hi there,
+>
+> I think the fact is:
+> - There are still considerable amount of people still using python2
+> - Python2 user will eventually upgrade to python3
+>
+> So any library not written in a compatible way will either break now for python2 user, or will break in the future for python3 user. So I suppose all library developer are writing compatible code, is that a fair assumption?
+>
+> Thanks,
+> Stone
+
+See https://python3statement.org/
+
+Some older libraries that used to maintain a compatible codebase have 
+already dropped Python 2 support, and other have moved to supporting new 
+features on Python 3 only. Many will drop Python 2 support no later than 
+2020.
+
+</p>
+<h2><a name="9">Re: Shall I worry about python2/3 compatibility when using library?</a></h2>
+<p>On 31/08/18 06:33, Stone Zhong wrote:
+> On Thursday, August 30, 2018 at 10:19:34 PM UTC-7, Terry Reedy wrote:
+>> On 8/30/2018 10:27 PM, Stone Zhong wrote:
+>>> Hi there,
+>>>
+>>> I think the fact is:
+>>> - There are still considerable amount of people still using python2
+>>> - Python2 user will eventually upgrade to python3
+>>>
+>>> So any library not written in a compatible way will either break now for python2 user, or will break in the future for python3 user. So I suppose all library developer are writing compatible code, is that a fair assumption?
+>>
+>> No.  Many people write new libraries only for recent version of Python
+>> 3.  Many people who have written Python 2 and 3 compatible libraries, or
+>> Python 2 and Python 3 versions of of their library, have or will drop
+>> Python 2 support for enhancements and even bugfixes for their library.
+>>
+>> That said, some people will continue to use existing python 2 code for a
+>> decade or more.
+>>
+>> -- 
+>> Terry Jan Reedy
+> 
+> Thanks for the reply Terry. Got it.
+> 
+> So some people main separate libraries for python2 and python3 (although this way it may have extra cost), and may eventually drop support for python2 lib or may not even have library for python2.
+> 
+> Thanks,
+> Stone
+> 
+
+Not really as many libraries dropped support for Python 2 some years 
+back.  Just one example is the extremely popular plotting library 
+matplotlib which has just put out release candidates for version 3.0.0. 
+This only supports Python 3.5+.
+
+-- 
+My fellow Pythonistas, ask not what our language can do for you, ask
+what you can do for our language.
+
+Mark Lawrence
+</p>
+<h2><a name="10">EuroPython 2018: Videos for Thursday available</a></h2>
+<p>We are pleased to announce the second batch of cut videos from
+EuroPython 2018 in Edinburgh, Scotland, UK.
+
+
+		 * EuroPython 2018 YouTube Playlist *
+
+https://www.youtube.com/watch?v=scum5a_mqBc&t=0s&index=84&list=PL8uoeex94UhFrNUV2m5MigREebUms39U5
+
+
+In this batch, we have included all videos for Thursday, July 26 2018,
+the second conference day.
+
+Next week we will publish videos for the final conference day. In
+total, we will have more than 130 videos available for you to watch.
+
+All EuroPython videos, including the ones from previous conferences,
+are available on our EuroPython YouTube Channel.
+
+    http://europython.tv/
+
+
+Help spread the word
+--------------------
+
+Please help us spread this message by sharing it on your social
+networks as widely as possible. Thank you !
+
+Link to the blog post:
+
+https://blog.europython.eu/post/177582893492/europython-2018-videos-for-thursday-available
+
+Tweet:
+
+https://twitter.com/europython/status/1035471566606397440
+
+
+Enjoy,
+--
+EuroPython 2018 Team
+https://ep2018.europython.eu/
+https://www.europython-society.org/
+</p>
+<h2><a name="11">ofo已拖欠云鸟、德邦等多家物流供应商亿元欠款</a></h2>
+<p>近日，有知情人士向财经网透露，最近一段时间，ofo拖欠了云鸟、德邦等多家物流供应商数亿人民币欠款，目
+前，ofo方面正在私下秘密与多家物流供应商谈判解决方案。一位接近此次谈判的云鸟物流内部人士向财经网表
+示，“与ofo的谈判非常吃力它可能真的没钱了，谈判只能慢慢推进”，该人士称，ofo与云鸟物流是合作关
+系，是云鸟物流的大客户，ofo方面却迟迟拖欠款项，目前已达1.1亿元左右。
+</p>
+<h2><a name="12">阿里巴巴14.66亿元认购三江购物股票，持股比例增为 32%</a></h2>
+<p>据腾讯科技，8月31日晚间，三江购物发布公告称，杭州阿里巴巴泽泰以现金认购其非公开发行的股票约1.3
+692亿股，认购价格为10.71元/股，认购金额14.66亿元。本次发行后，杭州阿里巴巴泽泰持有公司
+175,257,088股股票，占公司总股本的32%。
+</p>
+<h2><a name="13">滴滴在杭承诺：停止向未取得网约车许可车辆人员派单</a></h2>
+<p>据浙江新闻客户端，8月30日，杭州交通运管部门牵头，与市公安治安、交警车管等部门组织在杭取得经营许可
+的14家网约车平台，召开网络预约出租汽车规范管理工作会议。会议中有明确落地时间的一条规定为：于201
+8年10月1日零时起，停止向未取得网约车许可的车辆和人员派单。作出承诺的网约车平台，有曹操专车、首汽
+约车、神州专车、易到用车等14家，包括滴滴出行。
+</p>
+<h2><a name="14">滴滴：欢迎主管部门进驻检查，接受监督积极整改</a></h2>
+<p>36氪讯，8月31日，针对交通部称将在全国范围内对所有网约车顺风车平台公司开展进驻式全面检查，滴滴公
+司表示，欢迎主管部门进驻检查，滴滴将全力配合，接受监督积极整改，落实企业安全主体责任，保障公众出行安
+全。
+</p>
+<h2><a name="15">Apple Watch占全球智能手表41%份额，90%为一代产品</a></h2>
+<p>据新浪科技，8月31日，调研公司Counterpoint
+Research今日发布报告称，今年第二季度苹果公司Apple
+Watch智能手表占到了全球智能手表销量销量的41%，其中90%多为一代Apple Watch。
+</p>
+<h2><a name="16">腾讯将与史克威尔艾尼克斯成立合资公司</a></h2>
+<p>日经中文网报道，日本游戏软件制作开发公司史克威尔艾尼克斯控股8月30日宣布将与腾讯控股成立合资公司。
+腾讯在中国负责该公司游戏的发行和销售，史克威尔艾尼克斯则能够在中国全面拓展业务。两家公司计划联合开发
+新游戏，在全球范围内拓展游戏业务。
+</p>
+<h2><a name="17">传猎豹移动寻求私有化:开盘暴涨后回落，官方暂无回应</a></h2>
+<p>据新京报，8月31日晚，有媒体报道称猎豹正在接触买方财团，寻求以每股14至16美元的价格私有化。截至
+记者发稿时，猎豹移动方面暂未回复询问。截至8月30日收盘，猎豹移动股价为每股10.05美元。私有化消
+息传出后，开盘股价暴涨9.55%。不过，截至记者发稿时，股价回落至10.03美元，下跌0.2%。
+</p>
+<h2><a name="18">传美团点评确定IPO定价区间：每股60-72港币</a></h2>
+<p>据国外媒体报道，小米已经向印度班加罗尔的数字借贷平台ZestMoney 投资了1340万美元。本轮融
+资是ZestMoney最近完成的650万美元A轮融资的延伸，由小米领投，PayU、Ribbit
+Capital和Omidyar Networ等当前投资者参投。
+</p>
+<h2><a name="19">小米向印度数字借贷平台ZestMoney投资1340万美元</a></h2>
+<p>据中国证券报，上海凤凰8月31日晚发布公告称，上海凤凰控股子公司凤凰自行车因与东峡大通（北京）管理咨
+询有限公司买卖合同纠纷，于近日向北京市第一中级人民法院提起诉讼，诉讼涉及金额6815.11万元。资料
+显示，东峡大通即为ofo小黄车运营方。ofo公关部人士对中国证券报记者表示对此事不予置评。
+</p>
+<h2><a name="20">上海凤凰起诉ofo称后者拖欠贷款6815万，ofo不予置评</a></h2>
+<p>据新浪科技，近日有报道称，继华住酒店集团数据信息疑遭泄露后，顺丰也有超过3亿条数据疑似流出。对此，顺
+丰公司在官方微博表示，已第一时间报警，经技术手段交叉验证，暗网所售数据非顺丰数据。其次暗网所售数据均
+不涉及快件单号、托寄物、收发件时间等物流特征信息，其来源不明，冠以顺丰名义目的可疑。由于暗网匿名性很
+强，已成为网络黑市和犯罪收益的温床，存在极大隐患和风险，大家务必注意防范鉴别。
+</p>
+<h2><a name="21">顺丰：暗网所售数据非顺丰数据，不涉及物流特征信息</a></h2>
+<p>据美国科技网站The Information报道，有熟知内情的消息人士透露，阿里巴巴集团（NYSE:
+BABA）将暂停在美国市场上扩大云业务的计划，原因是此前该集团为与亚马逊网络服务（AWS）及其他大型
+云服务展开竞争而作出的初步努力未能达到预期。
+</p>
+<h2><a name="22">消息称阿里巴巴将暂停在美国市场扩大云业务</a></h2>
+<p>据新浪科技，9月1日，苹果表示，该公司上周在加州发生了首起自动驾驶汽车事故。根据加州机动车辆管理局（
+DMV）周五发布的报告：“一辆自动驾驶模式下的苹果测试车辆在准备从基弗路向南并入劳伦斯高速公路时遭遇
+追尾。一辆2016年产日产聆风以约15英里的时速追尾了苹果的测试车，当时苹果的测试车正准备并入主路，
+行驶时速不到1英里，正等待安全间距。两辆车都有不同程度损伤，没有人员伤亡。”
+</p>
+<h2><a name="23">苹果报告加州首起自动驾驶汽车事故，没有人员伤亡</a></h2>
+<p>据新浪科技，9月1日，流利说周五向美国证券交易委员会（SEC）提交了F-1招股书，计划通过首次公开招
+股（IPO）融资最多1亿美元。招股书显示，流利说计划在纽约股票交易所上市，代码为“LAIX”。目前版
+本的招股书尚未公布发行价区间和发行股数等信息。摩根士丹利和高盛将担任流利说此次IPO的联合主承销商。
+</p>
+<h2><a name="24">流利说在美提交招股书，拟融资最多1亿美元</a></h2>
+<p>据外媒GIZMODO报道，本周四，苹果公司对所有苹果应用开发商们宣布，从今年的10月3日起，所有新上
+线的应用和新的应用更新都必须包含一个隐私保护协议，苹果还要求应用开发商们必须同时上传新应用到苹果的应
+用商店App Store和苹果旗下一款名为TestFlight的移动应用测试服务软件。
+</p>
+<h2><a name="25">苹果颁布新规：要求所有应用包含隐私保护协议</a></h2>
+<p>36氪讯，近日，知识产权产业媒体IPRdaily发布“2018年全球区块链专利企业排行榜（TOP10
+0）”，中国公司占半数以上，BAT、华为等入榜。榜单显示，阿里巴巴以90项专利数排名第一，IBM和M
+asterCard分别以89、80专利数排榜单第二、三名。
+</p>
+</body>
+</html>
